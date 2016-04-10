@@ -2,3 +2,5 @@
  - BluetoothUpdate struktur --> getBluetoothUpdate funktion i server
 
  - libjson-spirit-dev för json på stationär
+
+test
