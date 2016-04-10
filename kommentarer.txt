@@ -1,0 +1,2 @@
+ - Behöver funktion för att hämta ut userTrackingAddress från ServerDB mha userID.
+ - BluetoothUpdate struktur --> getBluetoothUpdate funktion i server
