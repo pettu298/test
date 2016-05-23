@@ -1,0 +1,245 @@
+
+
+\documentclass[10pt,twocolumn]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{times}
+\usepackage{mathptmx}  
+\usepackage{spverbatim}
+\usepackage{graphicx}
+\usepackage{float}
+
+\renewcommand {\figurename}{Figur}
+
+\raggedbottom
+\sloppy
+
+\title{Laborationsrapport i TSKS10 \emph{Signaler, Information och Kommunikation}}
+
+\author{Peter Keijser Tullstedt \\ pettu298, 940625-0994}
+
+\date{2016-05-12}
+
+\begin{document}
+
+\maketitle
+
+\section{Inledning}
+
+Denna laboration gick ut på att demodulera en smalbandig signal som är I/Q-modulerad
+och som har passerat ett delvis okänt filter. Signalen innehåller hörbara signaler i form av 
+melodier och ordspråk. För att demodulera signalen behövdes först signalens bärfrekvens tas ut och ekoeffekter hanteras. Laborationens resultat var signalens bärfrekvens $f_c$, ekotidsfördröjningen $\tau_2 - \tau_1$ och en
+signal där ordspråk samt melodier kunde höras.\\
+
+Från laborationshandledningen gavs följande information om den givna signalen.
+\begin{itemize}
+
+	\item Radiostationen sänder ut en signal med utseendet:
+		$x(t) = x_I(t)\cos(2\pi f_c t)-x_Q(t)\sin(2\pi f_c t)+z(t)$,
+		där $z(t)$ är signaler ämnade för andra personer.
+
+	\item $x_I(t)$ och $x_Q(t)$ är meddelanden av intresse som innehåller melodi, ordspråk och vitt brus.
+
+	\item Bärfrekvensen $f_c$ är en multipel av 19 kHz.
+
+	\item På grund av ekoeffekter i radioutbredningsmiljön tas följande signal emot:
+		$y(t)=x(t - \tau_1)+0,9x(t - \tau_2)$.
+	$\tau_1$ är tiden det tar för signalen $x(t)$ att direkt nå mottagaren och $\tau_2$ är tiden det tar för signalens eko att nå mottagaren.
+
+	\item Den mottagna signalen lågpassfiltreras och samplas sedan med en samplingsfrekvens $f_s =400 $ 000 Hz.
+	
+\end{itemize}
+
+
+\section{Metod}
+
+Laborationen var uppdelad i tre uppgifter; ta reda på bärfrekvensen $f_c$, ta reda på differensen $\tau_2 - \tau_1$ och I/Q-demodulera signalen.
+
+\subsection{Identifiering av bärfrekvens}
+
+Bärfrekvensen fås utifrån amplitudspektrumet för signalen $y(t)$. Figur \ref{ampl} visar amplitudspektrumet $|Y(f)|$. Ur amplitudspektrumet erhålls tre olika bärfrekvenser, genom att titta på de områden som har stor nollskild aktivitet. Eftersom vi vet att den sökta bärfrekvensen är en multipel av 19 kHz kan vi specificera att de möjliga bärfrekvenserna är:
+
+\begin{itemize}
+
+	\item Signal $y_1$ med $f_{c1} = 76$ kHz,
+	\item signal $y_2$ med $f_{c2} = 114$ kHz, och
+	\item signal $y_3$ med $f_{c3} = 152$ kHz.
+
+\end{itemize}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.4\textwidth]{figures/figure1.eps}
+	\caption{Amplitudspektrum till den givna signalen.}
+	\label{ampl}
+\end{figure}
+
+Signalerna vid de olika frekvenserna filtreras ut med ett bandpassfilter med en bandbredd $B = 20000$, centrerad kring de möjliga bärfrekvenserna.
+Figur \ref{filtered} visar de filtrerade signalerna. Signalerna $y_2$ och $y_3$ ser ut att vara brus medan signalen $y_1$ ser ut att ha korrekt innehåll.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.35\textwidth]{figures/figure2.eps}
+	\caption{Sändarens tre signaler i tidsdomänen. }
+	\label{filtered}
+\end{figure}
+
+\subsection{Hantering av ekotidsfördröjning}
+
+För att ta bort ekoeffekterna i signalen så behöver ekots tidsfördröjning först hittas. Detta görs genom att autokorrelera signalen $y_2$. Då den är mest okorrelerad ger den tydligast resultat. I Figur \ref{echo} finns en huvudtopp vid tidsfördröjningen $t=0$ och en sidotopp vid tidsfördröjningen $t=0,38$ s. Detta är värdet för differensen mellan tidsfördröjningarna $\tau_2$ och $\tau_1$, vilket är tiden det tar mellan att signalen tas emot och signalens eko tas emot.
+
+Signalen $y_1$ delas in i block av $0,38f_s$ sampel. Det första blocket är ekofritt. $90\%$ av första blocket tas bort från det andra blocket, som då blir ekofri. Efter det tas $90\%$ av andra blocket bort från tredje blocket. Detta upprepas tills hela signalen $y_1(t)$ är ekofri. Låt oss kalla den ekofria signalen $y'_1(t)$.
+
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.3\textwidth]{figures/figure3.eps}
+	\caption{Autokorrelation för att bestämma ekots tidsfördröjning.}
+	\label{echo}
+\end{figure}
+
+\subsection{IQ-demodulering}
+
+När signalen är ekofri återstår bara I/Q-demodulering innan signalen är färdig. Från kursboken fås formlerna 
+\begin{itemize}
+\item $\hat{x}_I(t)=\mathcal{H}^{LP}_{B/2}{2g(t)\cos(2\pi f_c t - \delta)}$ och
+\item $\hat{x}_Q(t)=-\mathcal{H}^{LP}_{B/2}{2g(t)\sin(2\pi f_c t - \delta)}$. 
+\end{itemize}
+Fasförskjutningen $\delta$ uppkommer eftersom tidsfördröjningar i småbandiga signaler ger upphov till fasförskjutningar. Dessa fasförskjutningar har ett värde mellan 0 och $\frac{\pi}{2}$ då större värden på $\delta$ ger upprepningar eftersom $\cos(v + \frac{\pi}{2}) = \sin(v)$ och $\cos(v + n2\pi) = \cos(v)$.
+
+I detta fall är $g(t)=y'_1(t)$, $f_c = f_{c1} = 74000$ Hz, $B=20000$ Hz och $\delta = 0$.
+
+Basbandsignalerna $\hat{x}_I$ och $\hat{x}_Q$ kan nu spelas upp med hörbart ljud.
+
+\section{Resultat}
+
+Den sökta informationen är:
+\begin{itemize}
+\item Bärfrekvensen för nyttosignalen är $f_c=76$ kHz,
+\item differensen $\tau_2 - \tau_1 = 0,38$ s, 
+\item ordspråket i ena signalen är: ``Inget ont som inte har något gott med sig'' och
+\item ordspråket i andra signalen är: ``Väck inte den björn som sover''.
+\end{itemize}
+
+\onecolumn
+\clearpage
+
+\section*{Min Matlab-kod:}
+
+\begin{spverbatim}
+
+clc;clear; close all;
+
+%data in y, sample rate in Fs
+[y, Fs] = audioread('signal-pettu298.wav');
+
+% Transform
+Y = fft(y);
+
+% Check carrier frequencies
+len = length(y);
+freqAxis = Fs/2 * linspace(0, 1, len/2);
+
+
+plot(freqAxis, abs(Y(1:len/2)));
+title('Amplitude Spectrum');
+xlabel('Frequency (Hz)');
+ylabel('Magnitude |Y|');
+
+% Filter the appropriate values, can be seen in Amplitude Spectrum. 
+bandwidth = 20000;     % Set the bandwidth of filters to 2*10^4 Hz.
+   
+% Frequencies found in Amplitude Spectrum. Multiples of 19 kHz.
+fc1 = 76000;
+fc2 = 114000;
+fc3 = 152000;
+
+% Generate vector with len evenly spaced points
+timeAxis = linspace(0, len / Fs, len)';    
+
+% Butterworth-filter the found frequencies.
+[B, A] = butter(10, [fc1 - bandwidth/2, fc1 + bandwidth/2]/(Fs/2));
+y1 = filter(B, A, y);
+
+[B, A] = butter(10, [fc2 - bandwidth/2, fc2 + bandwidth/2]/(Fs/2));
+y2 = filter(B, A, y);
+
+[B, A] = butter(10, [fc3 - bandwidth/2, fc3 + bandwidth/2]/(Fs/2));
+y3 = filter(B, A, y);
+
+% Plot the filtered signals.
+figure(2);
+subplot(3,1,1);
+plot(timeAxis, y1);
+title(['fc1 = ' num2str(fc1) 'Hz']);
+
+subplot(3,1,2);
+plot(timeAxis, y2);
+title(['fc2 = ' num2str(fc2) 'Hz']);
+
+subplot(3,1,3);
+plot(timeAxis, y3);
+title(['fc3 = ' num2str(fc3) 'Hz']);
+
+% y1 (76 kHz) seems to be the desired signal.
+% y2 (114 kHz) seems to be white noise.
+
+% Cross-correlation of white noise (y2) to find echo time delay. 
+[corr, lags] = xcorr(y2);
+corr = corr(lags > 0); % Only positive time is relevant.
+lags = lags(lags > 0);
+
+% Plot Cross-correlation of white noise.
+figure(3);
+subplot(1,1,1);
+plot(lags/Fs, corr);
+xlabel('time (s)');
+title('Cross correlation of white noise');
+
+tau_2 = 0.38;     % Difference in seconds from correlation plot.
+nrSamples = tau_2 * Fs;    % Difference in samples.
+
+% Echo Cancellation.
+y1NoEcho = zeros(size(y1));
+
+% Add echo-free first segment to y1NoEcho. 
+y1NoEcho(1:nrSamples) = y1(1:nrSamples);
+
+% Split Echo Cancellation into segments of size nrSamples.
+for i = 1:46
+
+    % Segment nrSamples*i : nrSamples + nrSamples*i of y1NoEcho.
+    segNoEcho = y1NoEcho((1 + nrSamples*i):(nrSamples + nrSamples*i));  
+
+    % Following Segment but in signal y1.
+    segOriginal = y1((nrSamples + 1 + nrSamples*i):(i+2)*nrSamples);          
+    
+    % Set segment from segOriginal in y1NoEcho.
+    y1NoEcho((nrSamples + 1 + nrSamples*i):(i+2)*nrSamples) 
+    							= segOriginal - 0.9*segNoEcho;  
+
+end
+
+% Filter for IQ-demodulation.
+[B,A] = butter(8, bandwidth/(Fs/2), 'low');
+
+% I- and Q Carrier Signals. 
+ic = 2*cos(2*pi*fc1*timeAxis);
+qc = -2*sin(2*pi*fc1*timeAxis);
+
+% Filter I and Q components of signal y1NoEcho.
+yi = filter(B, A, y1NoEcho.*ic);
+yq = filter(B, A, y1NoEcho.*qc);
+
+i = decimate(yi, 10);
+q = decimate(yq, 10);
+
+% Play sound.
+soundsc(i, Fs/10);  % "Inget ont som inte har något gott med sig".
+pause;
+soundsc(q, Fs/10);  % "Väck inte den björn som sover".
+
+
+\end{spverbatim}
+
+\end{document}
